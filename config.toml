@@ -1,0 +1,9 @@
+search_criteria = [
+    'shopping',
+    'finance',
+    'education',
+    'news',
+    'music'
+]
+
+database_path = './datbase.db'
