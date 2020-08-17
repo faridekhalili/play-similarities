@@ -146,6 +146,7 @@ def crawl(seeds, num_for_each_seed):
     counter = 0
     indicator = 1
     for i in trange(num_seeds):
+        print("\n\nprocessing " + str(i)+"th seed " + str(seeds[i]) + ".\n\n")
         if i > 0:
             indicator = counter
         counter = gather_data_for_seed(seeds[i], counter, indicator, num_for_each_seed)
