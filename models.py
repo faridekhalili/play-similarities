@@ -15,12 +15,12 @@ class App(BaseModel):
     score = FloatField(null=True)
     seed = CharField(max_length=255)
     description = TextField()
+    row_number = IntegerField()
 
 
 class Similarity(BaseModel):
     app_id1 = ForeignKeyField(App)
     app_id2 = ForeignKeyField(App)
-    row_number = IntegerField()
 
     class Meta:
         primary_key = CompositeKey('app_id1', 'app_id2')
