@@ -24,8 +24,8 @@ root.addHandler(file_handler)
 attribute_error_list = []
 
 
-def write_attribute_error_list():
-    with open('AttributeErrorCounts.txt', 'w') as file:
+def write_attribute_error_list(AttributeErrorCounts):
+    with open(AttributeErrorCounts, 'w') as file:
         for attribute_error_cnt in attribute_error_list:
             file.write("%i\n" % attribute_error_cnt)
 
@@ -157,6 +157,7 @@ db.create_tables([App, Similarity])
 
 conf = toml.load('config.toml')
 seeds = conf['seed_apps']
+AttributeErrorCounts = conf['AttributeErrorCounts_path']
 
 crawl(seeds, 1000)
-write_attribute_error_list()
+write_attribute_error_list(AttributeErrorCounts)

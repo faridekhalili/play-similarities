@@ -11,4 +11,5 @@ seed_apps = [
     'org.openintents.shopping'
 ]
 
-database_path = './database.db'
+database_path = './output/database.db'
+AttributeErrorCounts_path = './output/AttributeErrorCounts.txt'
