@@ -71,7 +71,7 @@ def insert_similar_apps(app, counter, seed, app_cnt, attr_error_cnt):
         except (ReadTimeout, ConnectionError):
             root.warning("ReadTimeout error, waiting for 5 seconds.")
             time.sleep(5)
-    return app_cnt, attr_error_cnt
+    return app_cnt, counter, attr_error_cnt
 
 
 def insert_app(app, counter, seed, app_cnt):
@@ -105,7 +105,7 @@ def insert_app(app, counter, seed, app_cnt):
 
 def one_step_bfs(root_app, counter, seed, app_cnt, attr_error_cnt):
     app_cnt, counter = insert_app(root_app, counter, seed, app_cnt)
-    app_cnt, attr_error_cnt = insert_similar_apps(root_app, counter,
+    app_cnt, counter, attr_error_cnt = insert_similar_apps(root_app, counter,
                                                   seed, app_cnt, attr_error_cnt)
     return app_cnt, counter, attr_error_cnt
 
@@ -126,8 +126,12 @@ def gather_data_for_seed(seed, counter, indicator, num_for_each_seed):
                 print("Num of count : " + str(app_cnt) + " taking another step.")
                 print(40 * "#")
                 if nothing_updated_for_long(last_update_time):
+                    print("\n nothing_updated_for_long\n")
                     break
                 if indicator > counter:
+                    print("\nindicator > counter\n")
+                    print("indicator: "+ str(indicator))
+                    print("counter : " + str(counter))
                     break
                 query = App.select().where(App.row_number == indicator)
                 for application in query:
@@ -162,7 +166,7 @@ def gather_data_for_seed(seed, counter, indicator, num_for_each_seed):
 def crawl(seeds, num_for_each_seed):
     num_seeds = len(seeds)
     counter = 0
-    indicator = 0
+    indicator = 1
     for i in trange(num_seeds):
         if i > 0:
             indicator = counter
@@ -179,4 +183,4 @@ db.create_tables([App, Similarity])
 conf = toml.load('config.toml')
 seeds = conf['seed_apps']
 
-crawl(seeds, 65)
+crawl(seeds, 1000)
