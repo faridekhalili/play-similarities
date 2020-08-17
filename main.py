@@ -21,6 +21,8 @@ file_handler.setFormatter(formatter)
 root.addHandler(handler)
 root.addHandler(file_handler)
 
+attribute_error_list = []
+
 
 def some_new_app(count, prev_count):
     if count == prev_count:
@@ -53,7 +55,7 @@ def insert_similar(app, similar, sim_cnt):
     return sim_cnt
 
 
-def insert_similar_apps(app, seed, app_cnt, sim_cnt, attributeError_cnt):
+def insert_similar_apps(app, seed, app_cnt, sim_cnt, attr_error_cnt):
     while True:
         try:
             print()
@@ -68,14 +70,14 @@ def insert_similar_apps(app, seed, app_cnt, sim_cnt, attributeError_cnt):
                 sim_cnt = insert_similar(app, similar, sim_cnt)
             break
         except AttributeError:
-            attributeError_cnt += 1
             root.error("Fetching similar apps for %s failed, AttributeError" % app['app_id'])
+            attr_error_cnt += 1
             print("\nAttributeError\n")
             break
         except (ReadTimeout, ConnectionError):
             root.warning("ReadTimeout error, waiting for 5 seconds.")
             time.sleep(5)
-    return app_cnt, sim_cnt, attributeError_cnt
+    return app_cnt, sim_cnt, attr_error_cnt
 
 
 def insert_app(app, seed, app_cnt):
@@ -102,35 +104,27 @@ def insert_app(app, seed, app_cnt):
     return app_cnt
 
 
-def one_step_bfs(root_app, seed, app_cnt, sim_cnt, attributeError_cnt):
+def one_step_bfs(root_app, seed, app_cnt, sim_cnt, attr_error_cnt):
     app_cnt = insert_app(root_app, seed, app_cnt)
-    app_cnt, sim_cnt, attributeError_cnt = insert_similar_apps(root_app,
-                                                               seed,
-                                                               app_cnt,
-                                                               sim_cnt,
-                                                               attributeError_cnt)
-    return app_cnt, sim_cnt, attributeError_cnt
+    app_cnt, sim_cnt, attr_error_cnt = insert_similar_apps(root_app,
+                                       seed, app_cnt, sim_cnt, attr_error_cnt)
+    return app_cnt, sim_cnt, attr_error_cnt
 
 
-def gather_data_for_seed(seed,sim_count,indicator,num_for_each_seed):
-    attributeError_cnt = 0
+def gather_data_for_seed(seed, sim_count, indicator, num_for_each_seed):
     count = 0
+    attr_error_cnt = 0
     prev_count = count
     last_update_time = datetime.datetime.now()
     while True:
         try:
             app = play_scraper.details(seed)
-            count, sim_count, attributeError_cnt = one_step_bfs(app,
-                                                                seed,
-                                                                count,
-                                                                sim_count,
-                                                                attributeError_cnt)
-            prev_count, last_update_time = get_time_of_update(count,
-                                                              prev_count,
-                                                              last_update_time)
+            count, sim_count, attr_error_cnt = one_step_bfs(app, seed, count, sim_count, attr_error_cnt)
             while count < num_for_each_seed:
+                print(40 * "#")
+                print("Num of count : " + str(count) + " taking another step.")
+                print(40 * "#")
                 if nothing_updated_for_long(last_update_time):
-                    print("\nnothing_updated_for_long\n")
                     break
                 query = Similarity.select().where(Similarity.row_number == indicator)
                 for sim in query:
@@ -142,19 +136,14 @@ def gather_data_for_seed(seed,sim_count,indicator,num_for_each_seed):
                         except (ReadTimeout, ConnectionError):
                             root.warning("ReadTimeout error, waiting for 5 seconds.")
                             time.sleep(5)
-                    count, sim_count = one_step_bfs(app,
-                                                    seed,
-                                                    count,
-                                                    sim_count,
-                                                    attributeError_cnt)
+                    count, sim_count, attr_error_cnt = one_step_bfs(app,
+                                                       seed, count, sim_count, attr_error_cnt)
                     prev_count, last_update_time = get_time_of_update(count,
-                                                                      prev_count,
-                                                                      last_update_time)
-                    print(" in count : " + str(count))
-                    print(" in num_for_each_seed : " + str(num_for_each_seed))
+                                                    prev_count, last_update_time)
                 indicator += 1
-            print(" out count : " + str(count))
-            print(" out num_for_each_seed : " + str(num_for_each_seed))
+            print(40 * "#")
+            print("Num of count : " + str(count) + " moving on to the next seed.")
+            print(40 * "#")
             break
         except (ReadTimeout, ConnectionError):
             root.warning("ReadTimeout error, waiting for 5 seconds.")
@@ -162,24 +151,23 @@ def gather_data_for_seed(seed,sim_count,indicator,num_for_each_seed):
         except (HTTPError, ValueError):
             root.error("url for %s not found" % seed)
             break
-    return sim_count, attributeError_cnt
+    attribute_error_list.append(attr_error_cnt)
+    return sim_count
 
 
 def crawl(seeds, num_for_each_seed):
-    attributeError_cnt_list = []
     num_seeds = len(seeds)
     indicator = 0
     sim_count = 0
     for i in trange(num_seeds):
         if i > 0:
             indicator = sim_count
-        sim_count, attributeError_cnt = gather_data_for_seed(seeds[i],
-                                         sim_count,
-                                         indicator,
-                                         num_for_each_seed)
-        attributeError_cnt_list.append(attributeError_cnt)
-    print(" The list of number of apps that faced AttributeError is as below, accordingly:")
-    print(attributeError_cnt_list)
+        sim_count = gather_data_for_seed(seeds[i], sim_count, indicator, num_for_each_seed)
+    print(attribute_error_list)
+    with open('AttributeErrorCounts.txt', 'w') as file:
+        for attribute_error_cnt in attribute_error_list:
+            file.write("%i\n" % attribute_error_cnt)
+
 
 
 db.connect()
@@ -188,4 +176,4 @@ db.create_tables([App, Similarity])
 conf = toml.load('config.toml')
 seeds = conf['seed_apps']
 
-crawl(seeds, 200)
+crawl(seeds, 1000)
