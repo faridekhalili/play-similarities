@@ -1,9 +1,5 @@
-search_criteria = [
-    'shopping',
-    'finance',
-    'education',
-    'news',
-    'music'
+seed_apps = [
+    'com.eco.note'
 ]
 
-database_path = './datbase.db'
+database_path = './database.db'
