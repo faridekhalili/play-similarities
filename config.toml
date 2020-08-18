@@ -1,9 +1,15 @@
-search_criteria = [
-    'shopping',
-    'finance',
-    'education',
-    'news',
-    'music'
+seed_apps = [
+    'com.eco.note',
+    'com.swiftnotes.android',
+    'com.benoitletondor.easybudgetapp',
+    'luankevinferreira.expenses',
+    'com.kvannli.simonkvannli.dailybudget',
+    'com.blogspot.e_kanivets.moneytracker',
+    'pl.com.andrzejgrzyb.shoppinglist',
+    'br.com.activity',
+    'privacyfriendlyshoppinglist.secuso.org.privacyfriendlyshoppinglist',
+    'org.openintents.shopping'
 ]
 
-database_path = './datbase.db'
+database_path = './output/database.db'
+AttributeErrorCounts_path = './output/AttributeErrorCounts.txt'

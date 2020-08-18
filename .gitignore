@@ -3,4 +3,5 @@
 __pycache__/
 datbase.db
 venv
+error.log
 
