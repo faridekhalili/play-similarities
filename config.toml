@@ -12,4 +12,3 @@ seed_apps = [
 ]
 
 database_path = './output/database.db'
-AttributeErrorCounts_path = './output/AttributeErrorCounts.txt'

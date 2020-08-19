@@ -1,5 +1,5 @@
-from peewee import *
 import toml
+from peewee import *
 
 db = SqliteDatabase(toml.load('config.toml')['database_path'])
 
@@ -15,7 +15,6 @@ class App(BaseModel):
     score = FloatField(null=True)
     seed = CharField(max_length=255)
     description = TextField()
-    row_number = IntegerField()
 
 
 class Similarity(BaseModel):
