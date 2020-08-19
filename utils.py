@@ -45,12 +45,7 @@ def add_similars_to_db(app_id: str, seed: str, similars: list) -> list:
     new_similars = []
     for sim in similars:
         if not App.select().where(App.app_id == sim['app_id']).exists():
-            details = app_details(sim['app_id'])
-            if not len(details):
-                continue
-            created = add_app_to_db(sim['app_id'], seed, details)
-            if created:
-                new_similars.append(sim['app_id'])
+            new_similars.append(sim['app_id'])
             Similarity.get_or_create(
                 app_id1=app_id,
                 app_id2=sim['app_id'],

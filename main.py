@@ -25,10 +25,12 @@ class Forest():
                 continue
             created = add_app_to_db(node, seed, details)
             if created:
+                print('created %' % node)
                 similars = get_similars(node)
                 if not similars or not len(similars):
                     continue
                 new_similars = add_similars_to_db(node, seed, similars)
+                print('found %d new similar apps' % len(new_similars))
                 for similar in new_similars:
                     self.bfs_queue.put((similar, seed))
 
