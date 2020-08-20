@@ -36,6 +36,9 @@ def get_similars(app_id: str) -> dict:
         except (ReadTimeout, ConnectionError):
             logger.warning("ReadTimeout error, waiting for 5 seconds.")
             time.sleep(5)
+        except (HTTPError, ValueError):
+            logger.error("Fetching similar apps for %s failed, HTTPError" % app_id)
+            time.sleep(5)
         except AttributeError:
             logger.error("Fetching similar apps for %s failed, AttributeError" % app_id)
             return {}
