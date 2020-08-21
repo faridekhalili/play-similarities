@@ -27,6 +27,9 @@ def app_details(app_id: str) -> dict:
     except (HTTPError, ValueError):
         logger.error("url for %s not found" % app_id)
         return {}
+    except AttributeError:
+        logger.error("Fetching similar apps for %s failed, AttributeError" % app_id)
+        return {}
 
 
 def get_similars(app_id: str) -> dict:
