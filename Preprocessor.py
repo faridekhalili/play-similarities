@@ -1,5 +1,5 @@
-import re
 import toml
+import re
 import string
 import pandas as pd
 import sqlite3
@@ -55,13 +55,15 @@ def pre_process(data):
     return removed_redundant
 
 
-if __name__ == "__main__":
-    # Read sqlite query results into a pandas DataFrame
+def main():
     conf = toml.load('config.toml')
+    # Read sqlite query results into a pandas DataFrame
     con = sqlite3.connect(conf['database_path'])
     df = pd.read_sql_query("SELECT * from app", con)
     con.close()
-
     df[['description']] = pre_process(df[['description']])
-    df.to_csv("df.csv")
-    print(remove_redundant_words("shopping rocks rocks ab ab ab"))
+    df.to_csv("preprocessed.csv")
+
+
+if __name__ == "__main__":
+    main()
