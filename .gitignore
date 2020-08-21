@@ -3,4 +3,5 @@
 __pycache__/
 error.log
 database.db
-
+df.csv
+preprocessor.py

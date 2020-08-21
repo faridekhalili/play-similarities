@@ -41,7 +41,7 @@ def get_similars(app_id: str) -> dict:
             time.sleep(5)
         except (HTTPError, ValueError):
             logger.error("Fetching similar apps for %s failed, HTTPError" % app_id)
-            time.sleep(5)
+            return {}
         except AttributeError:
             logger.error("Fetching similar apps for %s failed, AttributeError" % app_id)
             return {}
