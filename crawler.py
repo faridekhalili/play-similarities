@@ -6,7 +6,7 @@ from models import *
 from utils import app_details, add_app_to_db, get_similars, add_similars_to_db
 
 
-class Forest():
+class Forest:
     def __init__(self, seeds: list, depth: int=1000):
         self.bfs_queue = queue.Queue()
         for seed in seeds:
@@ -14,10 +14,14 @@ class Forest():
         self.depth = depth
 
     def bfs(self):
+        fully_extracted_seeds = []
         while not self.bfs_queue.empty():
             node, seed = self.bfs_queue.get()
+            if seed in fully_extracted_seeds:
+                continue
             app_cnt = App.select().where(App.seed == seed).count()
             if app_cnt >= self.depth:
+                fully_extracted_seeds.append(seed)
                 print('continuing to next seed with {} apps gathered for {}'.format(app_cnt, seed))
                 continue
             details = app_details(node)
