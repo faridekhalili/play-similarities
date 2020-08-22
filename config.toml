@@ -12,3 +12,4 @@ seed_apps = [
 ]
 
 database_path = './output/database.db'
+model_path = './output/word2vec.model'
