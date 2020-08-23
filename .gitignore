@@ -4,4 +4,6 @@ __pycache__/
 datbase.db
 venv
 error.log
+output/database.db
+output/preprocessed.csv
 
