@@ -4,4 +4,5 @@ __pycache__/
 error.log
 output/database.db
 output/preprocessed.csv
+output/word2vec.model
 
