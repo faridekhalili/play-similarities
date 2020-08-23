@@ -62,7 +62,7 @@ def main():
     df = pd.read_sql_query("SELECT * from app", con)
     con.close()
     df[['description']] = pre_process(df[['description']])
-    df.to_csv("preprocessed.csv")
+    df.to_csv(conf['preprocessed_data_path'])
 
 
 if __name__ == "__main__":

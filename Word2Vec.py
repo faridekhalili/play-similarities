@@ -1,7 +1,9 @@
 import toml
-from gensim.models import Word2Vec
+from preprocessor import pre_process
+import sqlite3
 import pandas as pd
 from nltk.tokenize import word_tokenize
+from gensim.models import Word2Vec
 
 
 def word2vec_trainer(df):
@@ -14,7 +16,11 @@ def word2vec_trainer(df):
 
 def main():
     conf = toml.load('config.toml')
-    df = pd.read_csv("preprocessed.csv")
+    # Read sqlite query results into a pandas DataFrame
+    con = sqlite3.connect('./output/samples2.db')
+    df = pd.read_sql_query("SELECT * from app", con)
+    con.close()
+    df[['description']] = pre_process(df[['description']])
     model = word2vec_trainer(df)
     model.save(conf['model_path'])
 
