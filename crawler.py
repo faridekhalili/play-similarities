@@ -1,9 +1,75 @@
 import queue
-
-import toml
-
+import logging
+import time
+import sys
 from models import *
-from utils import app_details, add_app_to_db, get_similars, add_similars_to_db
+from play_scraper import details, similar
+from requests.exceptions import ReadTimeout, ConnectionError, HTTPError
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.WARNING)
+stream_handler = logging.StreamHandler(sys.stdout)
+stream_handler.setLevel(logging.WARNING)
+file_handler = logging.FileHandler('error.log')
+file_handler.setLevel(logging.ERROR)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+file_handler.setFormatter(formatter)
+file_handler.setFormatter(formatter)
+
+
+def app_details(app_id: str) -> dict:
+    try:
+        return details(app_id)
+    except (ReadTimeout, ConnectionError):
+        logger.warning("ReadTimeout error, waiting for 5 seconds.")
+        time.sleep(5)
+    except (HTTPError, ValueError):
+        logger.error("url for %s not found" % app_id)
+        return {}
+    except AttributeError:
+        logger.error("Fetching similar apps for %s failed, AttributeError" % app_id)
+        return {}
+
+
+def get_similars(app_id: str) -> dict:
+    while True:
+        try:
+            return similar(app_id, detailed=False)
+        except (ReadTimeout, ConnectionError):
+            logger.warning("ReadTimeout error, waiting for 5 seconds.")
+            time.sleep(5)
+        except (HTTPError, ValueError):
+            logger.error("Fetching similar apps for %s failed, HTTPError" % app_id)
+            return {}
+        except AttributeError:
+            logger.error("Fetching similar apps for %s failed, AttributeError" % app_id)
+            return {}
+
+
+def add_similars_to_db(app_id: str, seed: str, similars: list) -> list:
+    new_similars = []
+    for sim in similars:
+        if not App.select().where(App.app_id == sim['app_id']).exists():
+            new_similars.append(sim['app_id'])
+            Similarity.get_or_create(
+                app_id1=app_id,
+                app_id2=sim['app_id'],
+            )
+    return new_similars
+
+
+def add_app_to_db(app_id: str, seed: str, details: dict) -> bool:
+    _, created = App.get_or_create(
+        app_id=app_id,
+        defaults={
+            'category': details['category'],
+            'score': details['score'],
+            'seed': seed,
+            'description': details['description']
+        }
+    )
+    return created
 
 
 class Forest:
@@ -22,7 +88,7 @@ class Forest:
             print('continuing to next seed with {} apps gathered for {}'.format(app_cnt, seed))
             return True
 
-    def create_post_process(self, node, seed):
+    def add_similars_to_queue(self, node, seed):
         print('created %s' % node)
         similars = get_similars(node)
         if not similars or not len(similars):
@@ -43,7 +109,7 @@ class Forest:
                 continue
             created = add_app_to_db(node, seed, details)
             if created:
-                self.create_post_process(node, seed)
+                self.add_similars_to_queue(node, seed)
 
 
 def main():
