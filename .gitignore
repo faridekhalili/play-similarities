@@ -6,4 +6,4 @@ venv
 error.log
 output/database.db
 output/preprocessed.csv
-
+output/*.model
