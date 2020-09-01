@@ -1,9 +1,18 @@
+import ssl
+
 import toml
 import re
 import string
 import pandas as pd
 import sqlite3
 import nltk
+
+try:
+    _create_unverified_https_context = ssl._create_unverified_context
+except AttributeError:
+    pass
+else:
+    ssl._create_default_https_context = _create_unverified_https_context
 
 nltk.download('stopwords')
 nltk.download('punkt')
@@ -36,11 +45,8 @@ def lemmetizing(input_str):
     return ' '.join(result)
 
 
-def remove_redundant_words(input_str):
-    list_str = input_str.split()
-    unique_list = list(set(list_str))
-    result = ' '.join(unique_list)
-    return result
+def remove_unusual_char(input_str):
+    return re.sub('[^A-Za-z0-9 ]+', '', input_str)
 
 
 def pre_process(data):
@@ -51,8 +57,8 @@ def pre_process(data):
     removed_extra_white_space = striped_data.applymap(lambda s: ' '.join(s.split()))
     removed_stop_words = removed_extra_white_space.applymap(lambda s: remove_stop_words(s))
     lemmetized_data = removed_stop_words.applymap(lambda s: lemmetizing(s))
-    removed_redundant = lemmetized_data.applymap(lambda s: remove_redundant_words(s))
-    return removed_redundant
+    removed_unusual_char = lemmetized_data.applymap(lambda s: remove_unusual_char(s))
+    return removed_unusual_char
 
 
 def main():
