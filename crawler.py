@@ -32,7 +32,7 @@ def app_details(app_id: str) -> dict:
         return {}
 
 
-def get_similars(app_id: str) -> dict:
+def get_similars(app_id: str) -> list:
     while True:
         try:
             return similar(app_id, detailed=False)
