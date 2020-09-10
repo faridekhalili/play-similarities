@@ -4,6 +4,7 @@ import sys
 
 import peewee
 
+from mongo import insert_app_to_cloud
 from models import *
 from play_scraper import details, similar
 from requests.exceptions import ReadTimeout, ConnectionError, HTTPError
@@ -61,8 +62,10 @@ def add_similar_apps_to_db(app_id: str, similar_apps: list) -> list:
 
 
 def add_app_to_db(app_id: str, seed: str, detail: dict, app_cnt) -> bool:
-    print("detail for app_cnt: " + str(app_cnt))
-    print(detail)
+    app = {"app": app_id}
+    not_existed_in_cloud = insert_app_to_cloud(app)
+    if not_existed_in_cloud:
+        return False
     _, created = App.get_or_create(
         app_id=app_id,
         defaults={
@@ -85,7 +88,6 @@ class Forest:
     def add_app(self, node, seed):
         detail = app_details(node)
         if not detail or not len(detail):
-            print("SHOULD PASS")
             return
         created = add_app_to_db(node, seed, detail, self.app_cnt)
         if created:
@@ -104,15 +106,15 @@ class Forest:
         index = 0
         while True:
             try:
-                print("index" + str(index))
+                print("index: " + str(index))
                 current_node = App.get(App.row_number == index)
                 node = current_node.app_id
                 seed = current_node.seed
                 self.add_similar_apps(node, seed)
                 index += 1
                 if index == 15:
-                    print("index:" + str(index))
-                    print("app_cnt" + str(self.app_cnt))
+                    print("index reached it's limit: "+
+                          str(index)+".\t app_cnt: "+str(self.app_cnt)+".\n")
                     break
             except peewee.DoesNotExist:
                 logger.error("index %s is not available in App table where app_cnt is %s." % index % self.app_cnt)
