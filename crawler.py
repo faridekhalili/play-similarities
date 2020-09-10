@@ -91,7 +91,6 @@ class Forest:
             return
         created = add_app_to_db(node, seed, detail, self.app_cnt)
         if created:
-            print("app_cnt: " + str(self.app_cnt) + "\n")
             self.app_cnt += 1
 
     def add_similar_apps(self, node, seed):
@@ -112,10 +111,6 @@ class Forest:
                 seed = current_node.seed
                 self.add_similar_apps(node, seed)
                 index += 1
-                if index == 15:
-                    print("index reached it's limit: "+
-                          str(index)+".\t app_cnt: "+str(self.app_cnt)+".\n")
-                    break
             except peewee.DoesNotExist:
                 logger.error("index %s is not available in App table where app_cnt is %s." % index % self.app_cnt)
                 break
