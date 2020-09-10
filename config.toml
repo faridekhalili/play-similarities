@@ -11,7 +11,7 @@ seed_apps = [
     'org.openintents.shopping'
 ]
 
-database_path = './output/test.db'
+database_path = 'ntest.db'
 #database_path = './output/samples2.db'
 preprocessed_data_path = './output/preprocessed.csv'
 model_path = './output/word2vec.model'

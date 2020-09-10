@@ -1,11 +1,12 @@
-import queue
 import logging
 import time
 import sys
+
+import peewee
+
 from models import *
 from play_scraper import details, similar
 from requests.exceptions import ReadTimeout, ConnectionError, HTTPError
-
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
@@ -32,7 +33,7 @@ def app_details(app_id: str) -> dict:
         return {}
 
 
-def get_similars(app_id: str) -> list:
+def get_similar_apps(app_id: str) -> list:
     while True:
         try:
             return similar(app_id, detailed=False)
@@ -47,69 +48,75 @@ def get_similars(app_id: str) -> list:
             return {}
 
 
-def add_similars_to_db(app_id: str, seed: str, similars: list) -> list:
-    new_similars = []
-    for sim in similars:
+def add_similar_apps_to_db(app_id: str, similar_apps: list) -> list:
+    new_similar_apps = []
+    for sim in similar_apps:
         if not App.select().where(App.app_id == sim['app_id']).exists():
-            new_similars.append(sim['app_id'])
+            new_similar_apps.append(sim['app_id'])
             Similarity.get_or_create(
                 app_id1=app_id,
                 app_id2=sim['app_id'],
             )
-    return new_similars
+    return new_similar_apps
 
 
-def add_app_to_db(app_id: str, seed: str, details: dict) -> bool:
+def add_app_to_db(app_id: str, seed: str, detail: dict, app_cnt) -> bool:
+    print("detail for app_cnt: " + str(app_cnt))
+    print(detail)
     _, created = App.get_or_create(
         app_id=app_id,
         defaults={
-            'category': details['category'],
-            'score': details['score'],
+            'category': detail['category'],
+            'score': detail['score'],
             'seed': seed,
-            'description': details['description']
+            'description': detail['description'],
+            'row_number': app_cnt
         }
     )
     return created
 
 
 class Forest:
-    def __init__(self, seeds: list, depth: int = 1000):
-        self.bfs_queue = queue.Queue()
+    def __init__(self, seeds: list):
+        self.app_cnt = 0
         for seed in seeds:
-            self.bfs_queue.put((seed, seed))
-        self.depth = depth
+            self.add_app(seed, seed)
 
-    def skip_node(self, fully_extracted_seeds, seed):
-        if seed in fully_extracted_seeds:
-            return True
-        app_cnt = App.select().where(App.seed == seed).count()
-        if app_cnt >= self.depth:
-            fully_extracted_seeds.append(seed)
-            print('continuing to next seed with {} apps gathered for {}'.format(app_cnt, seed))
-            return True
+    def add_app(self, node, seed):
+        detail = app_details(node)
+        if not detail or not len(detail):
+            print("SHOULD PASS")
+            return
+        created = add_app_to_db(node, seed, detail, self.app_cnt)
+        if created:
+            print("app_cnt: " + str(self.app_cnt) + "\n")
+            self.app_cnt += 1
 
-    def add_similars_to_queue(self, node, seed):
-        print('created %s' % node)
-        similars = get_similars(node)
-        if not similars or not len(similars):
-            pass
-        new_similars = add_similars_to_db(node, seed, similars)
-        print('found %d new similar apps' % len(new_similars))
-        for similar in new_similars:
-            self.bfs_queue.put((similar, seed))
+    def add_similar_apps(self, node, seed):
+        similar_apps = get_similar_apps(node)
+        if not similar_apps or not len(similar_apps):
+            return
+        new_similar_apps = add_similar_apps_to_db(node, similar_apps)
+        for sim in new_similar_apps:
+            self.add_app(sim, seed)
 
     def bfs(self):
-        fully_extracted_seeds = []
-        while not self.bfs_queue.empty():
-            node, seed = self.bfs_queue.get()
-            if self.skip_node(fully_extracted_seeds, seed):
-                continue
-            details = app_details(node)
-            if not details or not len(details):
-                continue
-            created = add_app_to_db(node, seed, details)
-            if created:
-                self.add_similars_to_queue(node, seed)
+        index = 0
+        while True:
+            try:
+                print("index" + str(index))
+                current_node = App.get(App.row_number == index)
+                node = current_node.app_id
+                seed = current_node.seed
+                self.add_similar_apps(node, seed)
+                index += 1
+                if index == 15:
+                    print("index:" + str(index))
+                    print("app_cnt" + str(self.app_cnt))
+                    break
+            except peewee.DoesNotExist:
+                logger.error("index %s is not available in App table where app_cnt is %s." % index % self.app_cnt)
+                break
 
 
 def main():
