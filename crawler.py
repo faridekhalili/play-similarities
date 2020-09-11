@@ -54,17 +54,17 @@ def add_similar_apps_to_db(app_id: str, similar_apps: list) -> list:
     for sim in similar_apps:
         if not App.select().where(App.app_id == sim['app_id']).exists():
             new_similar_apps.append(sim['app_id'])
-            Similarity.get_or_create(
-                app_id1=app_id,
-                app_id2=sim['app_id'],
-            )
+        Similarity.get_or_create(
+            app_id1=app_id,
+            app_id2=sim['app_id'],
+        )
     return new_similar_apps
 
 
 def add_app_to_db(app_id: str, seed: str, detail: dict, app_cnt) -> bool:
     app = {"app": app_id}
     not_existed_in_cloud = insert_app_to_cloud(app)
-    if not_existed_in_cloud:
+    if not not_existed_in_cloud:
         return False
     _, created = App.get_or_create(
         app_id=app_id,
@@ -73,7 +73,8 @@ def add_app_to_db(app_id: str, seed: str, detail: dict, app_cnt) -> bool:
             'score': detail['score'],
             'seed': seed,
             'description': detail['description'],
-            'row_number': app_cnt
+            'row_number': app_cnt,
+            'expanded': False
         }
     )
     return created
@@ -91,6 +92,7 @@ class Forest:
             return
         created = add_app_to_db(node, seed, detail, self.app_cnt)
         if created:
+            print("app : "+str(self.app_cnt)+"created.")
             self.app_cnt += 1
 
     def add_similar_apps(self, node, seed):
@@ -101,8 +103,15 @@ class Forest:
         for sim in new_similar_apps:
             self.add_app(sim, seed)
 
+    def get_index(self):
+        query = App.select(fn.MIN(App.row_number)).where(App.expanded == False)
+        index = query.scalar()
+        max_app_cnt = App.select(fn.MAX(App.row_number)).scalar()
+        self.app_cnt = max_app_cnt + 1
+        return index
+
     def bfs(self):
-        index = 0
+        index = self.get_index()
         while True:
             try:
                 print("index: " + str(index))
@@ -110,6 +119,11 @@ class Forest:
                 node = current_node.app_id
                 seed = current_node.seed
                 self.add_similar_apps(node, seed)
+                try:
+                    query = App.update(expanded=True).where(App.row_number == index)
+                    query.execute()
+                except peewee.DoesNotExist:
+                    logger.error("index %s is not available in App table." % index)
                 index += 1
             except peewee.DoesNotExist:
                 logger.error("index %s is not available in App table where app_cnt is %s." % index % self.app_cnt)

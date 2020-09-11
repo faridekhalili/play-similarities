@@ -16,6 +16,7 @@ class App(BaseModel):
     seed = CharField(max_length=255)
     description = TextField()
     row_number = IntegerField()
+    expanded = BooleanField()
 
 
 class Similarity(BaseModel):
