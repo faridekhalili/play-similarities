@@ -7,3 +7,4 @@ error.log
 output/database.db
 output/preprocessed.csv
 output/*.model
+output/database-c1.db

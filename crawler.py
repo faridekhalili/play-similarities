@@ -3,6 +3,7 @@ import time
 import sys
 
 import peewee
+from numpy.random.mtrand import rand
 
 from mongo import insert_app_to_cloud
 from models import *
@@ -102,6 +103,7 @@ class Forest:
         new_similar_apps = add_similar_apps_to_db(node, similar_apps)
         for sim in new_similar_apps:
             self.add_app(sim, seed)
+            # time.sleep(rand()*20)
 
     def get_index(self):
         query = App.select(fn.MIN(App.row_number)).where(App.expanded == False)

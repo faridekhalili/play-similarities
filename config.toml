@@ -4,13 +4,13 @@ seed_apps = [
     'com.benoitletondor.easybudgetapp',
     'luankevinferreira.expenses',
     'com.kvannli.simonkvannli.dailybudget',
-    'com.blogspot.e_kanivets.moneytracker',
-    'pl.com.andrzejgrzyb.shoppinglist',
-    'br.com.activity',
-    'privacyfriendlyshoppinglist.secuso.org.privacyfriendlyshoppinglist',
-    'org.openintents.shopping'
+#    'com.blogspot.e_kanivets.moneytracker',
+#    'pl.com.andrzejgrzyb.shoppinglist',
+#    'br.com.activity',
+#    'privacyfriendlyshoppinglist.secuso.org.privacyfriendlyshoppinglist',
+#    'org.openintents.shopping'
 ]
 
-database_path = './output/test_db.db'
+database_path = './output/database-c1.db'
 preprocessed_data_path = './output/preprocessed.csv'
 model_path = './output/word2vec.model'
