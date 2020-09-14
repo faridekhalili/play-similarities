@@ -15,6 +15,8 @@ class App(BaseModel):
     score = FloatField(null=True)
     seed = CharField(max_length=255)
     description = TextField()
+    row_number = IntegerField()
+    expanded = BooleanField()
 
 
 class Similarity(BaseModel):
