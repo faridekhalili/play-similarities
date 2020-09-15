@@ -35,6 +35,7 @@ def app_details(app_id: str) -> dict:
         return {}
 
 
+
 def get_similar_apps(app_id: str) -> list:
     while True:
         try:
