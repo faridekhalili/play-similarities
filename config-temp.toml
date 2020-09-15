@@ -1,0 +1,3 @@
+database_path = './output/db-temp.db'
+preprocessed_data_path = './output/preprocessed.csv'
+model_path = './output/word2vec.model'

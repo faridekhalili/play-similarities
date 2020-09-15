@@ -143,10 +143,10 @@ class Forest:
 
 
 def main():
-    conf = toml.load('config.toml')
+    seed_list = toml.load('seeds.toml')
     db.connect()
     db.create_tables([App, Similarity])
-    forest = Forest(conf['seed_apps'])
+    forest = Forest(seed_list['seed_apps'])
     forest.bfs()
     print('%d apps gathered' % App.select().count())
     print('%d similarities gathered' % Similarity.select().count())

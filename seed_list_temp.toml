@@ -1,0 +1,11 @@
+seed_apps = [
+'com.boedec.hoel.speaker.cleaner.remove.water',
+'com.samidbangkit.freevpn',
+'androing.linuxhandbook',
+'com.bickster.walkbeforeyourun',
+'co.easyroads.app',
+'com.snscorp.tea_recipes',
+'com.sofachairdesign.atharizu',
+'com.cookware.eggrecipes',
+'com.bigsilentmonkey.testedadmentalconcolores'
+]
