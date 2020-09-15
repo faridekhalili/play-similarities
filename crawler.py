@@ -127,7 +127,7 @@ class Forest:
         while True:
             try:
                 print("index: " + str(index))
-                current_node = App.get(Similarity.row_number == index)
+                current_node = App.get(App.row_number == index)
                 node = current_node.app_id2
                 seed = current_node.seed
                 self.add_similar_apps(node, seed)
