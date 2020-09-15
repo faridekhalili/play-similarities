@@ -143,7 +143,7 @@ class Forest:
 
 
 def main():
-    seed_list = toml.load('seeds.toml')
+    seed_list = toml.load('seed_list.toml')
     db.connect()
     db.create_tables([App, Similarity])
     forest = Forest(seed_list['seed_apps'])
