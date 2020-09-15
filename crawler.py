@@ -1,15 +1,14 @@
 import logging
-import time
 import sys
+import time
 
 import peewee
-from numpy.random.mtrand import rand
 from langdetect import detect
-
-from mongo import insert_app_to_cloud
-from models import *
 from play_scraper import details, similar
 from requests.exceptions import ReadTimeout, ConnectionError, HTTPError
+
+from models import *
+from mongo import insert_app_to_cloud
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.WARNING)
@@ -66,8 +65,6 @@ def add_similar_apps_to_db(app_id: str, similar_apps: list) -> list:
 def add_app_to_db(app_id: str, seed: str, detail: dict, app_cnt) -> bool:
     app = {"app": app_id}
     not_existed_in_cloud = insert_app_to_cloud(app)
-    if detect(detail['description']) != 'en':
-        return False
     if not not_existed_in_cloud:
         return False
     _, created = App.get_or_create(
@@ -84,6 +81,13 @@ def add_app_to_db(app_id: str, seed: str, detail: dict, app_cnt) -> bool:
     return created
 
 
+def is_english(detail):
+    if detect(detail['description']) == 'en':
+        return True
+    else:
+        return False
+
+
 class Forest:
     def __init__(self, seeds: list):
         try:
@@ -95,7 +99,7 @@ class Forest:
 
     def add_app(self, node, seed):
         detail = app_details(node)
-        if not detail or not len(detail):
+        if not detail or not len(detail) or not is_english(detail):
             return
         created = add_app_to_db(node, seed, detail, self.app_cnt)
         if created:
