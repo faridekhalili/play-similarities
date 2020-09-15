@@ -1,16 +1,41 @@
 seed_apps = [
-    'com.eco.note',
-    'com.swiftnotes.android',
-    'com.benoitletondor.easybudgetapp',
-    'luankevinferreira.expenses',
-    'com.kvannli.simonkvannli.dailybudget',
+#    'com.eco.note',
+#    'com.swiftnotes.android',
+#    'com.benoitletondor.easybudgetapp',
+#    'luankevinferreira.expenses',
+#    'com.kvannli.simonkvannli.dailybudget',
 #    'com.blogspot.e_kanivets.moneytracker',
 #    'pl.com.andrzejgrzyb.shoppinglist',
 #    'br.com.activity',
 #    'privacyfriendlyshoppinglist.secuso.org.privacyfriendlyshoppinglist',
-#    'org.openintents.shopping'
+#    'org.openintents.shopping',
+#'com.KJKApps.EZTipCalculator',
+#'com.zandroid.tipcalculator',
+#'com.stoxline.bestclassicbooks',
+#'mobi.nullkm.logoquiz',
+#'kity.learn.real.guitar',
+#'com.trovit.android.apps.cars',
+#'com.nextmeta.app1037',
+#'upworksolutions.themagictricks',
+#'com.mobincube.draw_aircraft_jets.sc_DEYIGW',
+#'mdirectory.secapps.com.mdirectory',  
+#'com.phinesoft.destinator.world',
+#'com.tdz.continents.oceans.deserts',
+#'com.onlineeducare.basicbiology',
+#'com.tmt.anty.fly.sound.whistle.app',
+#'com.pishtech.ffs',
+#'com.acs.mountainlake.free',
+#'com.keronei.android.laptopReview',
+#'com.rank.sol.hikinggps',
+#'com.app.tgtg',
+'com.boedec.hoel.speaker.cleaner.remove.water',
+'com.samidbangkit.freevpn',
+'androing.linuxhandbook',
+'com.bickster.walkbeforeyourun',
+'',
+'', 
 ]
 
-database_path = './output/database-c1.db'
+database_path = './output/database-research-server.db'
 preprocessed_data_path = './output/preprocessed.csv'
 model_path = './output/word2vec.model'

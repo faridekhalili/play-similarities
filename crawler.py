@@ -38,7 +38,7 @@ def app_details(app_id: str) -> dict:
 def get_similar_apps(app_id: str) -> list:
     while True:
         try:
-            return similar(app_id, detailed=False)
+            return similar(app_id, detailed=False, results=60)
         except (ReadTimeout, ConnectionError):
             logger.warning("ReadTimeout error, waiting for 5 seconds.")
             time.sleep(5)
@@ -93,7 +93,7 @@ class Forest:
             return
         created = add_app_to_db(node, seed, detail, self.app_cnt)
         if created:
-            print("app : "+str(self.app_cnt)+"created.")
+            print("app : "+str(self.app_cnt)+" " + node +" created.")
             self.app_cnt += 1
 
     def add_similar_apps(self, node, seed):
