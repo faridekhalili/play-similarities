@@ -34,6 +34,8 @@ toml==0.10.1
 tqdm==4.48.2
 trange==0.1.1
 urllib3==1.25.10
+<<<<<<< HEAD
+=======
 beautifulsoup4==4.9.1
 boto==2.49.0
 boto3==1.14.51
@@ -72,3 +74,4 @@ toml==0.10.1
 tqdm==4.48.2
 trange==0.1.1
 urllib3==1.25.10
+>>>>>>> 865d80fb6d7a7093bdcde1a8f1a29646ba60c469
