@@ -128,7 +128,7 @@ class Forest:
             try:
                 print("index: " + str(index))
                 current_node = App.get(App.row_number == index)
-                node = current_node.app_id2
+                node = current_node.app_id
                 seed = current_node.seed
                 self.add_similar_apps(node, seed)
                 try:
