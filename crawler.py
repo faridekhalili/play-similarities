@@ -36,7 +36,6 @@ def app_details(app_id: str) -> dict:
         return {}
 
 
-
 def get_similar_apps(app_id: str) -> list:
     while True:
         try:
@@ -100,7 +99,7 @@ class Forest:
             return
         created = add_app_to_db(node, seed, detail, self.app_cnt)
         if created:
-            print("app : "+str(self.app_cnt)+" " + node +" created.")
+            print("app : " + str(self.app_cnt) + " " + node + " created.")
             self.app_cnt += 1
 
     def add_similar_apps(self, node, seed):
