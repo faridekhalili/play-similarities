@@ -4,6 +4,7 @@ import sys
 
 import peewee
 from numpy.random.mtrand import rand
+from langdetect import detect
 
 from mongo import insert_app_to_cloud
 from models import *
@@ -65,6 +66,8 @@ def add_similar_apps_to_db(app_id: str, similar_apps: list) -> list:
 def add_app_to_db(app_id: str, seed: str, detail: dict, app_cnt) -> bool:
     app = {"app": app_id}
     not_existed_in_cloud = insert_app_to_cloud(app)
+    if detect(detail['description']) != 'en':
+        return False
     if not not_existed_in_cloud:
         return False
     _, created = App.get_or_create(
@@ -117,8 +120,8 @@ class Forest:
         while True:
             try:
                 print("index: " + str(index))
-                current_node = App.get(App.row_number == index)
-                node = current_node.app_id
+                current_node = App.get(Similarity.row_number == index)
+                node = current_node.app_id2
                 seed = current_node.seed
                 self.add_similar_apps(node, seed)
                 try:
