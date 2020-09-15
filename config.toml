@@ -32,8 +32,11 @@ seed_apps = [
 'com.samidbangkit.freevpn',
 'androing.linuxhandbook',
 'com.bickster.walkbeforeyourun',
-'',
-'', 
+'co.easyroads.app',
+'com.snscorp.tea_recipes',
+'com.sofachairdesign.atharizu',
+'com.cookware.eggrecipes',
+'com.bigsilentmonkey.testedadmentalconcolores' 
 ]
 
 database_path = './output/database-research-server.db'

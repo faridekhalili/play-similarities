@@ -39,7 +39,7 @@ def app_details(app_id: str) -> dict:
 def get_similar_apps(app_id: str) -> list:
     while True:
         try:
-            return similar(app_id, detailed=False, results=60)
+            return similar(app_id, detailed=False)
         except (ReadTimeout, ConnectionError):
             logger.warning("ReadTimeout error, waiting for 5 seconds.")
             time.sleep(5)
