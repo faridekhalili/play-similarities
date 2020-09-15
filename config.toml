@@ -9,25 +9,6 @@ seed_apps = [
 #    'br.com.activity',
 #    'privacyfriendlyshoppinglist.secuso.org.privacyfriendlyshoppinglist',
 #    'org.openintents.shopping',
-#'com.KJKApps.EZTipCalculator',
-#'com.zandroid.tipcalculator',
-#'com.stoxline.bestclassicbooks',
-#'mobi.nullkm.logoquiz',
-#'kity.learn.real.guitar',
-#'com.trovit.android.apps.cars',
-#'com.nextmeta.app1037',
-#'upworksolutions.themagictricks',
-#'com.mobincube.draw_aircraft_jets.sc_DEYIGW',
-#'mdirectory.secapps.com.mdirectory',  
-#'com.phinesoft.destinator.world',
-#'com.tdz.continents.oceans.deserts',
-#'com.onlineeducare.basicbiology',
-#'com.tmt.anty.fly.sound.whistle.app',
-#'com.pishtech.ffs',
-#'com.acs.mountainlake.free',
-#'com.keronei.android.laptopReview',
-#'com.rank.sol.hikinggps',
-#'com.app.tgtg',
 'com.boedec.hoel.speaker.cleaner.remove.water',
 'com.samidbangkit.freevpn',
 'androing.linuxhandbook',
@@ -36,7 +17,7 @@ seed_apps = [
 'com.snscorp.tea_recipes',
 'com.sofachairdesign.atharizu',
 'com.cookware.eggrecipes',
-'com.bigsilentmonkey.testedadmentalconcolores' 
+'com.bigsilentmonkey.testedadmentalconcolores'
 ]
 
 database_path = './output/database-research-server.db'

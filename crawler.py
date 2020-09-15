@@ -84,7 +84,10 @@ def add_app_to_db(app_id: str, seed: str, detail: dict, app_cnt) -> bool:
 
 class Forest:
     def __init__(self, seeds: list):
-        self.app_cnt = 0
+        try:
+            self.get_index()
+        except TypeError:
+            self.app_cnt = 0
         for seed in seeds:
             self.add_app(seed, seed)
 
