@@ -9,6 +9,6 @@ output/preprocessed.csv
 output/*.model
 output/database-c1.db
 output/database-research-server.db
-#seed_list.toml
-#seed.toml
+seed_list.toml
+seed.toml
 config.toml
