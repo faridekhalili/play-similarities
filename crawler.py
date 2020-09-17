@@ -17,7 +17,7 @@ logging.info("Running Crawler")
 logger = logging.getLogger(__name__)
 config = toml.load('config.toml')
 
-
+from scrap_request import *
 
 
 def add_similar_apps_to_db(app_id: str, similar_apps: list) -> list:
