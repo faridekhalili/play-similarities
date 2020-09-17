@@ -9,6 +9,7 @@ output/preprocessed.csv
 output/*.model
 output/database-c1.db
 output/database-research-server.db
+utils/get_mongo_client.py
 seed_list.toml
 seed.toml
 config.toml
