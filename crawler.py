@@ -4,21 +4,22 @@ import time
 
 import peewee
 from langdetect import detect
+from langdetect.lang_detect_exception import LangDetectException
 from play_scraper import details, similar
 from requests.exceptions import ReadTimeout, ConnectionError, HTTPError
 
+from cloud_db import insert_app_to_cloud
+from get_new_seeds import get_new_seeds
 from models import *
-from mongo import insert_app_to_cloud
 
+logging.basicConfig(filename='error.log',
+                    filemode='a',
+                    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                    datefmt='%H:%M:%S',
+                    level=logging.INFO)
+logging.info("Running Crawler")
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.WARNING)
-stream_handler = logging.StreamHandler(sys.stdout)
-stream_handler.setLevel(logging.WARNING)
-file_handler = logging.FileHandler('error.log')
-file_handler.setLevel(logging.ERROR)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-file_handler.setFormatter(formatter)
-file_handler.setFormatter(formatter)
+config = toml.load('config.toml')
 
 
 def app_details(app_id: str) -> dict:
@@ -82,7 +83,12 @@ def add_app_to_db(app_id: str, seed: str, detail: dict, app_cnt) -> bool:
 
 
 def is_english(detail):
-    if detect(detail['description']) == 'en':
+    try:
+        lang = detect(detail['description'])
+    except LangDetectException as e:
+        logging.error('lang did not detected %s' % detail['app_id'])
+        return False
+    if lang == 'en':
         return True
     else:
         return False
@@ -138,8 +144,14 @@ class Forest:
                     logger.error("index %s is not available in App table." % index)
                 index += 1
             except peewee.DoesNotExist:
-                logger.error("index %s is not available in App table where app_cnt is %s." % index % self.app_cnt)
-                break
+                logger.warning(f'index {index} is not available in App table where app_cnt is {self.app_cnt}.')
+                self.inject_seeds()
+
+    def inject_seeds(self):
+        new_seeds = get_new_seeds(config['seed_injection_num'])
+        for seed in new_seeds:
+            self.add_app(seed, seed)
+        logger.info(f'{len(new_seeds)} new seeds added')
 
 
 def main():
