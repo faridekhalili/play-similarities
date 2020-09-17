@@ -146,6 +146,7 @@ class Forest:
             except peewee.DoesNotExist:
                 logger.warning(f'index {index} is not available in App table where app_cnt is {self.app_cnt}.')
                 self.inject_seeds()
+                index = self.get_index()
 
     def inject_seeds(self):
         new_seeds = get_new_seeds(config['seed_injection_num'])
