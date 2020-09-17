@@ -1,12 +1,8 @@
 import logging
-import sys
-import time
 
 import peewee
 from langdetect import detect
 from langdetect.lang_detect_exception import LangDetectException
-from play_scraper import details, similar
-from requests.exceptions import ReadTimeout, ConnectionError, HTTPError
 
 from cloud_db import insert_app_to_cloud
 from get_new_seeds import get_new_seeds
@@ -22,33 +18,6 @@ logger = logging.getLogger(__name__)
 config = toml.load('config.toml')
 
 
-def app_details(app_id: str) -> dict:
-    try:
-        return details(app_id)
-    except (ReadTimeout, ConnectionError):
-        logger.warning("ReadTimeout error, waiting for 5 seconds.")
-        time.sleep(5)
-    except (HTTPError, ValueError):
-        logger.error("url for %s not found" % app_id)
-        return {}
-    except AttributeError:
-        logger.error("Fetching similar apps for %s failed, AttributeError" % app_id)
-        return {}
-
-
-def get_similar_apps(app_id: str) -> list:
-    while True:
-        try:
-            return similar(app_id, detailed=False)
-        except (ReadTimeout, ConnectionError):
-            logger.warning("ReadTimeout error, waiting for 5 seconds.")
-            time.sleep(5)
-        except (HTTPError, ValueError):
-            logger.error("Fetching similar apps for %s failed, HTTPError" % app_id)
-            return {}
-        except AttributeError:
-            logger.error("Fetching similar apps for %s failed, AttributeError" % app_id)
-            return {}
 
 
 def add_similar_apps_to_db(app_id: str, similar_apps: list) -> list:

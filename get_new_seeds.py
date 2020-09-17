@@ -1,12 +1,9 @@
-import ssl
-from pymongo import MongoClient
-import os
-import play_scraper
-from random_word import RandomWords
-import time
 import random
 import string
+import time
 
+from random_word import RandomWords
+from scrap_request import app_details
 from cloud_db import app_exist
 
 r = RandomWords()
@@ -24,7 +21,7 @@ def sleep():
 def analyse_apps(app_ids: list):
     apps_ids_not_games = []
     for app_id in app_ids:
-        details = play_scraper.details(app_id)
+        details = app_details(app_id)
         sleep()
         category = list(details['category'])
         if any("GAME" not in s for s in category):
