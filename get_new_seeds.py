@@ -5,7 +5,7 @@ import time
 from random_word import RandomWords
 from scrap_request import app_details
 from cloud_db import app_exist
-
+import play_scraper
 r = RandomWords()
 
 
