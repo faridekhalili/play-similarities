@@ -21,7 +21,7 @@ def app_details(app_id: str) -> dict:
         try:
             return details(app_id)
         except (ReadTimeout, ConnectionError):
-            logger.warning(f"ReadTimeout error, waiting for {str(i**4)} seconds.")
+            logger.warning(f"ReadTimeout error, waiting for {str(i**3)} seconds.")
 
         except (HTTPError, ValueError):
             logger.error("url for %s not found" % app_id)
@@ -36,7 +36,7 @@ def get_similar_apps(app_id: str) -> list:
         try:
             return similar(app_id, detailed=False)
         except (ReadTimeout, ConnectionError):
-            logger.warning(f"ReadTimeout error, waiting for {str(i**4)}  seconds.")
+            logger.warning(f"ReadTimeout error, waiting for {str(i**3)}  seconds.")
         except (HTTPError, ValueError):
             logger.error("Fetching similar apps for %s failed, HTTPError" % app_id)
         except AttributeError:

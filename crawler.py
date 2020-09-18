@@ -1,4 +1,4 @@
-from cloud_db import app_exist
+from cloud_db import app_exist, insert_app_to_cloud
 from get_new_seeds import get_new_seeds
 from scrap_request import *
 from utils.lang_detect import is_english
@@ -21,6 +21,9 @@ app_queue = []
 
 
 def add_app_to_db(app_id: str, detail: dict, similar_apps) -> bool:
+    already_in_db = not insert_app_to_cloud(app_id)
+    if already_in_db:
+        return False
     _, created = App.get_or_create(
         app_id=app_id,
         defaults={
