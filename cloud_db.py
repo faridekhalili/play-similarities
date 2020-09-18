@@ -12,7 +12,7 @@ apps = db.Apps
 
 def insert_app_to_cloud(app):
     try:
-        apps.insert_one(app)
+        apps.insert_one({'app': app})
     except DuplicateKeyError:
         return False
     return True
