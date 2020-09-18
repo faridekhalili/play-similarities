@@ -17,16 +17,12 @@ def get_random_string(length):
     return ''.join(random.choice(letters) for i in range(length))
 
 
-def sleep():
-    #    time.sleep(random.uniform(0, 1))
-    pass
-
-
 def analyse_apps(app_ids: list):
     apps_ids_not_games = []
     for app_id in app_ids:
         details = app_details(app_id)
-        sleep()
+        if details['category'] and is_english(details):
+            apps_ids_not_games.append(app_id)
         category = list(details['category'])
         if any("GAME" not in s for s in category) and is_english(details):
             apps_ids_not_games.append(app_id)
@@ -53,7 +49,6 @@ def get_new_seeds(num: int):
         for i in range(13):
             app_ids = []
             apps_returned = play_scraper.search(word, page=i)
-            sleep()
             for item in apps_returned:
                 aid = item['app_id']
                 if app_exist(aid):

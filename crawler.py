@@ -1,6 +1,3 @@
-from langdetect import detect
-from langdetect.lang_detect_exception import LangDetectException
-
 from cloud_db import app_exist
 from get_new_seeds import get_new_seeds
 from scrap_request import *
