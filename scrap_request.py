@@ -25,8 +25,8 @@ def app_details(app_id: str) -> dict:
             time.sleep(5)
         except (HTTPError, ValueError):
             logger.error("url for %s not found" % app_id)
-            logger.warning('sleep 5 min')
-            time.sleep(5 * 60)
+            logger.warning('sleep 30 sec')
+            time.sleep(30)
         except AttributeError:
             logger.error("Fetching similar apps for %s failed, AttributeError" % app_id)
             return {}
@@ -41,8 +41,8 @@ def get_similar_apps(app_id: str) -> list:
             time.sleep(5)
         except (HTTPError, ValueError):
             logger.error("Fetching similar apps for %s failed, HTTPError" % app_id)
-            logger.warning('sleep 5 min')
-            time.sleep(5 * 60)
+            logger.warning('sleep 30 sec')
+            time.sleep(30)
             return {}
         except AttributeError:
             logger.error("Fetching similar apps for %s failed, AttributeError" % app_id)

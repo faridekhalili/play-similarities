@@ -15,8 +15,8 @@ def get_random_string(length):
 
 
 def sleep():
-    time.sleep(random.uniform(0, 1))
-
+#    time.sleep(random.uniform(0, 1))
+    pass
 
 def analyse_apps(app_ids: list):
     apps_ids_not_games = []

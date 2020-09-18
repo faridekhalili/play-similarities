@@ -48,7 +48,7 @@ def add_app_to_db(app_id: str, seed: str, detail: dict, app_cnt) -> bool:
             'expanded': False
         }
     )
-    return created
+    return True
 
 
 def is_english(detail):
