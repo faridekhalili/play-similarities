@@ -1,14 +1,10 @@
-import logging
-import sys
-
-import peewee
 from langdetect import detect
 from langdetect.lang_detect_exception import LangDetectException
-from regex._regex_core import apply_quantifier
 
-from cloud_db import insert_app_to_cloud, app_exist
+from cloud_db import app_exist
 from get_new_seeds import get_new_seeds
-from models import *
+from scrap_request import *
+from utils.lang_detect import is_english
 
 logFormatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
 logger = logging.getLogger()
@@ -23,16 +19,11 @@ logger.addHandler(consoleHandler)
 logger.setLevel(logging.INFO)
 
 config = toml.load('config.toml')
-from scrap_request import *
 
 app_queue = []
 
 
 def add_app_to_db(app_id: str, detail: dict, similar_apps) -> bool:
-    app = {"app": app_id}
-    not_existed_in_cloud = (not app_exist(app))
-    if not not_existed_in_cloud:
-        return False
     _, created = App.get_or_create(
         app_id=app_id,
         defaults={
@@ -43,45 +34,35 @@ def add_app_to_db(app_id: str, detail: dict, similar_apps) -> bool:
             'developer_id': detail['developer_id']
         }
     )
-    return True
-
-
-def is_english(detail):
-    try:
-        lang = detect(detail['description'])
-    except LangDetectException as e:
-        logging.error('lang did not detected %s' % detail['app_id'])
-        return False
-    if lang == 'en':
-        return True
-    else:
-        return False
+    return created
 
 
 def similar_apps_to_str(similar_apps):
+    if similar_apps is None:
+        return None
     ids = [i['app_id'] for i in similar_apps]
     return ','.join(ids)
 
 
-def node_info_exist(detail, similar_apps):
+def node_info_exist(detail):
     if not detail or not len(detail) or not is_english(detail):
-        return False
-    if not similar_apps or not len(similar_apps):
         return False
     return True
 
 
 def add_app(node):
-    detail = app_details(node)
-    similar_apps = get_similar_apps(node)
-    similar_apps_str = similar_apps_to_str(similar_apps)
-    if not node_info_exist(detail, similar_apps):
-        return
-    created = add_app_to_db(node, detail, similar_apps_str)
-    if created:
-        app_queue.extend([i['app_id'] for i in similar_apps])
-        logger.info(f'{len(similar_apps)} apps added to queue')
-        logger.info(f'{len(app_queue)} apps inside queue')
+    not_existed_in_cloud = (not app_exist(node))
+    if not_existed_in_cloud:
+        detail = app_details(node)
+        similar_apps = get_similar_apps(node)
+        similar_apps_str = similar_apps_to_str(similar_apps)
+        if not node_info_exist(detail):
+            logger.info(f'No info or not english for {node}')
+            return
+        created = add_app_to_db(node, detail, similar_apps_str)
+        if created and similar_apps:
+            app_queue.extend([i['app_id'] for i in similar_apps])
+            logger.info(f'{len(similar_apps)} apps added to queue total {len(app_queue)}')
 
 
 def bfs():

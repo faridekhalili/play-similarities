@@ -14,8 +14,8 @@ class App(BaseModel):
     category = CharField(max_length=64)
     score = FloatField(null=True)
     description = TextField()
-    similar_apps = TextField()
-    developer_id = CharField(max_length=255)
+    similar_apps = TextField(null=True)
+    developer_id = CharField(max_length=255, null=True)
 
 
 class Similarity(BaseModel):

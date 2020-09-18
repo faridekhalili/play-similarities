@@ -6,6 +6,9 @@ from random_word import RandomWords
 from scrap_request import app_details
 from cloud_db import app_exist
 import play_scraper
+
+from utils.lang_detect import is_english
+
 r = RandomWords()
 
 
@@ -15,8 +18,9 @@ def get_random_string(length):
 
 
 def sleep():
-#    time.sleep(random.uniform(0, 1))
+    #    time.sleep(random.uniform(0, 1))
     pass
+
 
 def analyse_apps(app_ids: list):
     apps_ids_not_games = []
@@ -24,7 +28,7 @@ def analyse_apps(app_ids: list):
         details = app_details(app_id)
         sleep()
         category = list(details['category'])
-        if any("GAME" not in s for s in category):
+        if any("GAME" not in s for s in category) and is_english(details):
             apps_ids_not_games.append(app_id)
     return set(apps_ids_not_games)
 

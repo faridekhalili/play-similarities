@@ -17,7 +17,7 @@ config = toml.load('config.toml')
 
 
 def app_details(app_id: str) -> dict:
-    for i in range(6):
+    for i in range(3):
         try:
             return details(app_id)
         except (ReadTimeout, ConnectionError):
@@ -33,7 +33,7 @@ def app_details(app_id: str) -> dict:
 
 
 def get_similar_apps(app_id: str) -> list:
-    for i in range(5):
+    for i in range(3):
         try:
             return similar(app_id, detailed=False)
         except (ReadTimeout, ConnectionError):
@@ -43,7 +43,6 @@ def get_similar_apps(app_id: str) -> list:
             logger.error("Fetching similar apps for %s failed, HTTPError" % app_id)
             logger.warning(f'sleep {str(i**4)}  sec')
             time.sleep(i**4)
-            return {}
         except AttributeError:
             logger.error("Fetching similar apps for %s failed, AttributeError" % app_id)
             return {}
