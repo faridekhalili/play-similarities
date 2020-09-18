@@ -1,40 +1,36 @@
 import logging
+import sys
 
 import peewee
 from langdetect import detect
 from langdetect.lang_detect_exception import LangDetectException
+from regex._regex_core import apply_quantifier
 
-from cloud_db import insert_app_to_cloud
+from cloud_db import insert_app_to_cloud, app_exist
 from get_new_seeds import get_new_seeds
 from models import *
 
-logging.basicConfig(filename='error.log',
-                    filemode='a',
-                    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-                    datefmt='%H:%M:%S',
-                    level=logging.INFO)
-logging.info("Running Crawler")
-logger = logging.getLogger(__name__)
-config = toml.load('config.toml')
+logFormatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")
+logger = logging.getLogger()
 
+fileHandler = logging.FileHandler("error.log")
+fileHandler.setFormatter(logFormatter)
+logger.addHandler(fileHandler)
+
+consoleHandler = logging.StreamHandler()
+consoleHandler.setFormatter(logFormatter)
+logger.addHandler(consoleHandler)
+logger.setLevel(logging.INFO)
+
+config = toml.load('config.toml')
 from scrap_request import *
 
-
-def add_similar_apps_to_db(app_id: str, similar_apps: list) -> list:
-    new_similar_apps = []
-    for sim in similar_apps:
-        if not App.select().where(App.app_id == sim['app_id']).exists():
-            new_similar_apps.append(sim['app_id'])
-        Similarity.get_or_create(
-            app_id1=app_id,
-            app_id2=sim['app_id'],
-        )
-    return new_similar_apps
+app_queue = []
 
 
-def add_app_to_db(app_id: str, seed: str, detail: dict, app_cnt) -> bool:
+def add_app_to_db(app_id: str, detail: dict, similar_apps) -> bool:
     app = {"app": app_id}
-    not_existed_in_cloud = insert_app_to_cloud(app)
+    not_existed_in_cloud = (not app_exist(app))
     if not not_existed_in_cloud:
         return False
     _, created = App.get_or_create(
@@ -42,10 +38,9 @@ def add_app_to_db(app_id: str, seed: str, detail: dict, app_cnt) -> bool:
         defaults={
             'category': detail['category'],
             'score': detail['score'],
-            'seed': seed,
             'description': detail['description'],
-            'row_number': app_cnt,
-            'expanded': False
+            'similar_apps': similar_apps,
+            'developer_id': detail['developer_id']
         }
     )
     return True
@@ -63,75 +58,56 @@ def is_english(detail):
         return False
 
 
-class Forest:
-    def __init__(self, seeds: list):
-        try:
-            self.get_index()
-        except TypeError:
-            self.app_cnt = 0
-        for seed in seeds:
-            self.add_app(seed, seed)
+def similar_apps_to_str(similar_apps):
+    ids = [i['app_id'] for i in similar_apps]
+    return ','.join(ids)
 
-    def add_app(self, node, seed):
-        detail = app_details(node)
-        if not detail or not len(detail) or not is_english(detail):
-            return
-        created = add_app_to_db(node, seed, detail, self.app_cnt)
-        if created:
-            print("app : " + str(self.app_cnt) + " " + node + " created.")
-            self.app_cnt += 1
 
-    def add_similar_apps(self, node, seed):
-        similar_apps = get_similar_apps(node)
-        if not similar_apps or not len(similar_apps):
-            return
-        new_similar_apps = add_similar_apps_to_db(node, similar_apps)
-        for sim in new_similar_apps:
-            self.add_app(sim, seed)
-            # time.sleep(rand()*20)
+def node_info_exist(detail, similar_apps):
+    if not detail or not len(detail) or not is_english(detail):
+        return False
+    if not similar_apps or not len(similar_apps):
+        return False
+    return True
 
-    def get_index(self):
-        query = App.select(fn.MIN(App.row_number)).where(App.expanded == False)
-        index = query.scalar()
-        max_app_cnt = App.select(fn.MAX(App.row_number)).scalar()
-        self.app_cnt = max_app_cnt + 1
-        return index
 
-    def bfs(self):
-        index = self.get_index()
-        while True:
-            try:
-                print("index: " + str(index))
-                current_node = App.get(App.row_number == index)
-                node = current_node.app_id
-                seed = current_node.seed
-                self.add_similar_apps(node, seed)
-                try:
-                    query = App.update(expanded=True).where(App.row_number == index)
-                    query.execute()
-                except peewee.DoesNotExist:
-                    logger.error("index %s is not available in App table." % index)
-                index += 1
-            except peewee.DoesNotExist:
-                logger.warning(f'index {index} is not available in App table where app_cnt is {self.app_cnt}.')
-                self.inject_seeds()
-                index = self.get_index()
+def add_app(node):
+    detail = app_details(node)
+    similar_apps = get_similar_apps(node)
+    similar_apps_str = similar_apps_to_str(similar_apps)
+    if not node_info_exist(detail, similar_apps):
+        return
+    created = add_app_to_db(node, detail, similar_apps_str)
+    if created:
+        app_queue.extend([i['app_id'] for i in similar_apps])
+        logger.info(f'{len(similar_apps)} apps added to queue')
+        logger.info(f'{len(app_queue)} apps inside queue')
 
-    def inject_seeds(self):
-        new_seeds = get_new_seeds(config['seed_injection_num'])
-        for seed in new_seeds:
-            self.add_app(seed, seed)
-        logger.info(f'{len(new_seeds)} new seeds added')
+
+def bfs():
+    while True:
+        if app_queue.__len__() > 0:
+            node = app_queue.pop()
+            add_app(node)
+        else:
+            logger.info(f'Queue is empty.')
+            inject_seeds()
+
+
+def inject_seeds():
+    new_seeds = get_new_seeds(config['seed_injection_num'])
+    logger.info(f'{len(new_seeds)} new seeds found')
+    for seed in new_seeds:
+        add_app(seed)
+    logger.info(f'{len(new_seeds)} new seeds added')
 
 
 def main():
-    seed_list = toml.load('seed_list.toml')
+    app_queue.extend(toml.load('seed_list.toml')['seed_apps'])
     db.connect()
-    db.create_tables([App, Similarity])
-    forest = Forest(seed_list['seed_apps'])
-    forest.bfs()
+    db.create_tables([App])
+    bfs()
     print('%d apps gathered' % App.select().count())
-    print('%d similarities gathered' % Similarity.select().count())
 
 
 if __name__ == '__main__':

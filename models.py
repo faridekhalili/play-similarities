@@ -11,12 +11,11 @@ class BaseModel(Model):
 
 class App(BaseModel):
     app_id = CharField(max_length=255, primary_key=True)
-    category = CharField(max_length=64, index=True)
+    category = CharField(max_length=64)
     score = FloatField(null=True)
-    seed = CharField(max_length=255)
     description = TextField()
-    row_number = IntegerField(index=True)
-    expanded = BooleanField()
+    similar_apps = TextField()
+    developer_id = CharField(max_length=255)
 
 
 class Similarity(BaseModel):
