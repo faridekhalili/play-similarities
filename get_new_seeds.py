@@ -3,7 +3,7 @@ import string
 import time
 
 from random_word import RandomWords
-from scrap_request import app_details
+from scrap_request import app_details, search_app
 from cloud_db import app_exist
 import play_scraper
 
@@ -21,8 +21,11 @@ def analyse_apps(app_ids: list):
     apps_ids_not_games = []
     for app_id in app_ids:
         details = app_details(app_id)
-        if details['category'] and is_english(details):
+        if not details:
+            continue
+        if not details['category'] and is_english(details):
             apps_ids_not_games.append(app_id)
+            continue
         category = list(details['category'])
         if any("GAME" not in s for s in category) and is_english(details):
             apps_ids_not_games.append(app_id)
@@ -48,15 +51,24 @@ def get_new_seeds(num: int):
         # there are maximum 12 pages
         for i in range(13):
             app_ids = []
-            apps_returned = play_scraper.search(word, page=i)
-            for item in apps_returned:
-                aid = item['app_id']
-                if app_exist(aid):
-                    continue
-                app_ids.append(aid)
+            apps_returned = search_app(word, page=i)
+            if not apps_returned:
+                continue
+            new_apps = filter_existing_apps(apps_returned)
+            app_ids.extend(new_apps)
             ok_ids.update(analyse_apps(app_ids))
             if len(ok_ids) >= num:
                 return ok_ids
+
+
+def filter_existing_apps(apps_returned):
+    new_apps=[]
+    for item in apps_returned:
+        aid = item['app_id']
+        if app_exist(aid):
+            continue
+        new_apps.append(aid)
+    return new_apps
 
 
 if __name__ == "__main__":
