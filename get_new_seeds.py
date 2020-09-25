@@ -35,7 +35,7 @@ def analyse_apps(app_ids: list):
 def get_random_word():
     try:
         # sometimes this function call gives network error, get a random string instead
-        return r.get_random_word()
+        return r.get_random_word(hasDictionaryDef="True")
     except:
         return get_random_string(5)
 
@@ -56,7 +56,6 @@ def get_new_seeds(num: int):
             app_ids = []
             apps_returned = search_app(word, page=i)
             if not apps_returned or redundant_results(apps_returned, previous_apps_searched):
-                print(i, len(ok_ids) , word)
                 break
             new_apps = filter_existing_apps(apps_returned)
             app_ids.extend(new_apps)
