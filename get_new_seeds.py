@@ -40,29 +40,34 @@ def get_random_word():
         return get_random_string(5)
 
 
+def redundant_results(apps_returned, previous_apps_searched):
+    exist = [i in previous_apps_searched for i in apps_returned]
+    return not False in exist
+
+
 def get_new_seeds(num: int):
-    # num must be at least one
-    if num <= 0:
+    if num <= 0:  # num must be at least one
         num = 1
-    # search 10000 words maximum
     ok_ids = set()
-    for k in range(10000):
+    for k in range(10000):  # search 10000 words maximum
         word = get_random_word()
-        # there are maximum 12 pages
-        for i in range(13):
+        previous_apps_searched = []
+        for i in range(13):  # there are maximum 12 pages
             app_ids = []
             apps_returned = search_app(word, page=i)
-            if not apps_returned:
-                continue
+            if not apps_returned or redundant_results(apps_returned, previous_apps_searched):
+                print(i, len(ok_ids) , word)
+                break
             new_apps = filter_existing_apps(apps_returned)
             app_ids.extend(new_apps)
             ok_ids.update(analyse_apps(app_ids))
+            previous_apps_searched = apps_returned
             if len(ok_ids) >= num:
                 return ok_ids
 
 
 def filter_existing_apps(apps_returned):
-    new_apps=[]
+    new_apps = []
     for item in apps_returned:
         aid = item['app_id']
         if app_exist(aid):
