@@ -28,7 +28,7 @@ def lda(df):
 def main():
     conf = toml.load('config-temp.toml')
     df = pd.read_csv(conf["preprocessed_data_path"])
-    lda_model = lda(df)
+    lda_model = lda(df.loc[:, ['description']])
     lda_model.save(conf['lda_model_path'])
 
 

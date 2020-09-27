@@ -1,5 +1,7 @@
 xdatabase_path = './output/db-temp.db'
+database_path = './output/samples.db'
 preprocessed_data_path = './output/preprocessed_samples2.csv'
 model_path = './output/word2vec.model'
 lda_model_path = './output/lda/lda_model'
+google_play_model_path = './output/google_play_categories'
 seed_injection_num = 100
