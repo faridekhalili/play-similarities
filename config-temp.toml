@@ -1,4 +1,5 @@
-database_path = './output/db-temp.db'
-preprocessed_data_path = './output/preprocessed.csv'
+xdatabase_path = './output/db-temp.db'
+preprocessed_data_path = './output/preprocessed_samples2.csv'
 model_path = './output/word2vec.model'
+lda_model_path = './output/lda/lda_model'
 seed_injection_num = 100
