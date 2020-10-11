@@ -1,4 +1,4 @@
-from Word2Vec import *
+from Categorization.Word2Vec import *
 
 
 def gp_cluster(df, model_path):
@@ -11,9 +11,9 @@ def gp_cluster(df, model_path):
 
 
 def main():
-    conf = toml.load('config-temp.toml')
-    df = pd.read_csv(conf["preprocessed_data_path"])
-    gp_cluster(df, conf["google_play_model_path"])
+    conf = toml.load('../config-temp.toml')
+    df = pd.read_csv('../'+conf["preprocessed_data_path"])
+    gp_cluster(df, '../'+conf["google_play_model_path"])
 
 
 if __name__ == "__main__":

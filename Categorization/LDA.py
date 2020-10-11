@@ -47,10 +47,10 @@ def best_lda(df):
 
 
 def main():
-    conf = toml.load('config-temp.toml')
-    df = pd.read_csv(conf["preprocessed_data_path"])
+    conf = toml.load('../config-temp.toml')
+    df = pd.read_csv('../'+conf["preprocessed_data_path"])
     best_lda_model = best_lda(df.loc[:, ['description']])
-    best_lda_model.save(conf['lda_model_path'])
+    best_lda_model.save('../'+conf['lda_model_path'])
 
 
 if __name__ == "__main__":

@@ -13,10 +13,10 @@ def word2vec_trainer(df):
 
 
 def main():
-    conf = toml.load('config.toml')
-    df = pd.read_csv(conf["preprocessed_data_path"])
+    conf = toml.load('../config-temp.toml')
+    df = pd.read_csv('../'+conf["preprocessed_data_path"])
     model = word2vec_trainer(df)
-    model.save(conf['model_path'])
+    model.save('../'+conf['model_path'])
 
 
 if __name__ == "__main__":
