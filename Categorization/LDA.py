@@ -1,19 +1,22 @@
+import toml
+import pandas as pd
+from nltk.tokenize import word_tokenize
 import gensim
 from gensim.models.coherencemodel import CoherenceModel
-from pprint import pprint
-import numpy as np
 import matplotlib.pyplot as plt
-from Categorization.Word2Vec import *
+import numpy as np
+from pprint import pprint
+from Categorization.Word2Vec import train_and_test_word2vec
 
 
-def best_lda(df, max_ntops):
+def best_lda(df, max_ntops, plot_path):
     description_list, dictionary, bow_corpus = get_bow_corpus(df)
     corpus_tfidf = get_tfidf_corpus(bow_corpus)
-    best_num_topics, coherence_scores = search_num_of_topics(max_ntops, corpus_tfidf,
-                                                             dictionary, description_list)
+    best_num_topics = search_num_of_topics(max_ntops, corpus_tfidf,
+                                           dictionary, description_list, plot_path)
     best_lda_model = lda(corpus_tfidf, best_num_topics, dictionary)
     pprint(best_lda_model.print_topics())
-    return best_lda_model, coherence_scores, corpus_tfidf
+    return best_lda_model, corpus_tfidf
 
 
 def get_bow_corpus(df):
@@ -29,15 +32,16 @@ def get_tfidf_corpus(bow_corpus):
     return corpus_tfidf
 
 
-def search_num_of_topics(max_ntops, corpus, dictionary, description_list):
+def search_num_of_topics(max_ntops, corpus, dictionary, texts, plot_path):
     coherence_scores = []
     for i in range(max_ntops):
         lda_model = lda(corpus, i + 1, dictionary)
-        cm = CoherenceModel(model=lda_model, texts=description_list,
+        cm = CoherenceModel(model=lda_model, texts=texts,
                             corpus=corpus, coherence='c_v')
         coherence_scores.append(cm.get_coherence())
     best_num_topics = coherence_scores.index(max(coherence_scores)) + 1
-    return best_num_topics, coherence_scores
+    plot_coherence_scores(max_ntops, coherence_scores, plot_path)
+    return best_num_topics
 
 
 def lda(corpus, num_topics, dictionary):
@@ -48,7 +52,7 @@ def lda(corpus, num_topics, dictionary):
     return lda_model
 
 
-def plot_coherence_scores(max_ntops, coherence_scores, figure_path):
+def plot_coherence_scores(max_ntops, coherence_scores, plot_path):
     x = [i + 1 for i in range(max_ntops)]
     plt.figure(figsize=(10, 5))
     plt.plot(x, coherence_scores)
@@ -56,15 +60,15 @@ def plot_coherence_scores(max_ntops, coherence_scores, figure_path):
     plt.xlabel('Number of topics')
     plt.ylabel('Coherence score')
     plt.tight_layout()
-    plt.savefig(figure_path)
-    plt.show()
+    plt.savefig(plot_path)
 
 
-def divide_into_clusters(best_lda_model, df, corpus_tfidf, model_path):
+def divide_into_clusters(best_lda_model, df, corpus_tfidf):
     topic_clusters = extract_dominant_topics(best_lda_model, corpus_tfidf)
-    extended_df = pd.DataFrame(list(zip(list(df["description"]), topic_clusters)),
-                               columns=['description', 'topic'])
-    extract_models(extended_df, model_path)
+    description_list = list(map(lambda x: word_tokenize(x), list(df["description"])))
+    extended_df = pd.DataFrame(list(zip(list(description_list, topic_clusters))),
+                               columns=['description', 'label'])
+    return extended_df
 
 
 def extract_dominant_topics(best_lda_model, corpus_tfidf):
@@ -76,25 +80,16 @@ def extract_dominant_topics(best_lda_model, corpus_tfidf):
     return topic_clusters
 
 
-def extract_models(df, model_path):
-    count = 0
-    for category, df_category in df.groupby('topic'):
-        count += 1
-        model_name = model_path + str(count) + ".model"
-        model = word2vec_trainer(df_category)
-        model.save(model_name)
-
-
 def main():
     max_ntops = 100
     conf = toml.load('../config-temp.toml')
+    model_path = '../' + conf['lda_model_path']
+    plot_path = model_path + '../lda_coherence.png'
     df = pd.read_csv('../' + conf["preprocessed_data_path"])
-    best_lda_model, coherence_scores, corpus_tfidf = \
-        best_lda(df.loc[:, ['description']], max_ntops)
-
-    plot_coherence_scores(max_ntops, coherence_scores, '../' + conf["lda_coherence_figure_path"])
-
-    divide_into_clusters(best_lda_model, df, corpus_tfidf, '../' + conf['lda_model_path'])
+    best_lda_model, corpus_tfidf = best_lda(df.loc[:, ['description']], max_ntops,
+                                            plot_path)
+    extended_df = divide_into_clusters(best_lda_model, df, corpus_tfidf)
+    train_and_test_word2vec(extended_df, model_path)
 
 
 if __name__ == "__main__":

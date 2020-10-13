@@ -1,19 +1,21 @@
-from Categorization.Word2Vec import *
+import toml
+import pandas as pd
+from nltk.tokenize import word_tokenize
+from Categorization.Word2Vec import train_and_test_word2vec
 
 
 def gp_cluster(df, model_path):
-    count = 0
-    for category, df_category in df.groupby('category'):
-        count += 1
-        model_name = model_path + str(count) + "th_model.model"
-        model = word2vec_trainer(df_category)
-        model.save(model_name)
+    description_list = list(map(lambda x: word_tokenize(x), list(df["description"])))
+    extended_df = pd.DataFrame(list(zip(list(description_list, list(df["category"])))),
+                               columns=['description', 'label'])
+    train_and_test_word2vec(extended_df, model_path)
 
 
 def main():
     conf = toml.load('../config-temp.toml')
-    df = pd.read_csv('../'+conf["preprocessed_data_path"])
-    gp_cluster(df, '../'+conf["google_play_model_path"])
+    model_path = '../' + conf["google_play_model_path"]
+    df = pd.read_csv('../' + conf["preprocessed_data_path"])
+    gp_cluster(df, model_path)
 
 
 if __name__ == "__main__":
