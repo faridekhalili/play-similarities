@@ -38,7 +38,7 @@ def remove_stop_words(input_str):
         return joined_result
 
 
-def lemmetizing(input_str):
+def lemmatizing(input_str):
     lemmatizer = WordNetLemmatizer()
     input_str = word_tokenize(input_str)
     result = [lemmatizer.lemmatize(i) for i in input_str]
@@ -56,9 +56,10 @@ def pre_process(data):
     striped_data = removed_punctuation_data.applymap(lambda s: s.strip())
     removed_extra_white_space = striped_data.applymap(lambda s: ' '.join(s.split()))
     removed_stop_words = removed_extra_white_space.applymap(lambda s: remove_stop_words(s))
-    lemmetized_data = removed_stop_words.applymap(lambda s: lemmetizing(s))
-    removed_unusual_char = lemmetized_data.applymap(lambda s: remove_unusual_char(s))
-    return removed_unusual_char
+    lemmatized_data = removed_stop_words.applymap(lambda s: lemmatizing(s))
+    removed_unusual_char = lemmatized_data.applymap(lambda s: remove_unusual_char(s))
+    tokenized_data = removed_unusual_char.applymap(lambda s: word_tokenize(s))
+    return tokenized_data
 
 
 def main():

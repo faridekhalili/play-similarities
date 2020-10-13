@@ -63,10 +63,8 @@ def split_train_test(df, test_size=0.3, shuffle_state=True):
 
 
 def word2vec_trainer(df, size, model_path):
-    description_list = list(map(lambda x: word_tokenize(x),
-                                list(df["description"])))
     start_time = time.time()
-    model = Word2Vec(description_list,
+    model = Word2Vec(list(df["description"]),
                      min_count=1, size=size, workers=3, window=3, sg=1)
     print("Time taken to train the word2vec model: " + str(time.time() - start_time))
     model.save(model_path)

@@ -10,7 +10,8 @@ from Categorization.Word2Vec import train_and_test_word2vec
 
 
 def best_lda(df, max_ntops, plot_path):
-    description_list, dictionary, bow_corpus = get_bow_corpus(df)
+    description_list = list(df["description"])
+    dictionary, bow_corpus = get_bow_corpus(description_list)
     corpus_tfidf = get_tfidf_corpus(bow_corpus)
     best_num_topics = search_num_of_topics(max_ntops, corpus_tfidf,
                                            dictionary, description_list, plot_path)
@@ -19,11 +20,10 @@ def best_lda(df, max_ntops, plot_path):
     return best_lda_model, corpus_tfidf
 
 
-def get_bow_corpus(df):
-    description_list = list(map(lambda x: word_tokenize(x), list(df["description"])))
-    dictionary = gensim.corpora.Dictionary(description_list)
-    bow_corpus = [dictionary.doc2bow(doc) for doc in description_list]
-    return description_list, dictionary, bow_corpus
+def get_bow_corpus(texts):
+    dictionary = gensim.corpora.Dictionary(texts)
+    bow_corpus = [dictionary.doc2bow(doc) for doc in texts]
+    return dictionary, bow_corpus
 
 
 def get_tfidf_corpus(bow_corpus):
@@ -64,8 +64,8 @@ def plot_coherence_scores(max_ntops, coherence_scores, plot_path):
 
 
 def divide_into_clusters(best_lda_model, df, corpus_tfidf):
+    description_list = list(df["description"])
     topic_clusters = extract_dominant_topics(best_lda_model, corpus_tfidf)
-    description_list = list(map(lambda x: word_tokenize(x), list(df["description"])))
     extended_df = pd.DataFrame(list(zip(list(description_list, topic_clusters))),
                                columns=['description', 'label'])
     return extended_df

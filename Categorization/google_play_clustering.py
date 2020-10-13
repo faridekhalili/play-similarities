@@ -5,7 +5,7 @@ from Categorization.Word2Vec import train_and_test_word2vec
 
 
 def gp_cluster(df, model_path):
-    description_list = list(map(lambda x: word_tokenize(x), list(df["description"])))
+    description_list = list(df["description"])
     extended_df = pd.DataFrame(list(zip(list(description_list, list(df["category"])))),
                                columns=['description', 'label'])
     train_and_test_word2vec(extended_df, model_path)
