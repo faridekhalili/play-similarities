@@ -4,16 +4,20 @@ from pprint import pprint
 from Categorization.Word2Vec import *
 
 
-def get_bow_corpus(texts):
+def get_bow_corpus(texts, topic_modeling_path):
+    dictionary_path = topic_modeling_path + "dataset.dictionary"
     dictionary = gensim.corpora.Dictionary(texts)
     bow_corpus = [dictionary.doc2bow(doc) for doc in texts]
+    gensim.corpora.dictionary.save(dictionary_path)
     return dictionary, bow_corpus
 
 
-def get_tfidf_corpus(df):
-    dictionary, bow_corpus = get_bow_corpus(df)
+def get_tfidf_corpus(df, topic_modeling_path):
+    tfidf_path = topic_modeling_path + "dataset.tfidf_model"
+    dictionary, bow_corpus = get_bow_corpus(df, topic_modeling_path)
     tfidf = gensim.models.TfidfModel(bow_corpus)
     corpus_tfidf = tfidf[bow_corpus]
+    tfidf.save(tfidf_path)
     return dictionary, corpus_tfidf
 
 
@@ -95,20 +99,21 @@ def divide_into_clusters(best_model, df, corpus_tfidf, topic_model_path):
 def main():
     max_ntops = 100
     conf = toml.load('../config-temp.toml')
+    topic_modeling_path = '../' + conf['topic_modeling_path']
     df = pd.read_csv('../' + conf["preprocessed_data_path"])
     texts = list(df["description"])
-    dictionary, corpus_tfidf = get_tfidf_corpus(texts)
+    dictionary, corpus_tfidf = get_tfidf_corpus(texts, topic_modeling_path)
 
-    lda_path = '../' + conf['lda_model_path']
-    lda_model_path = lda_path + '/model/LDA.model'
+    lda_path = topic_modeling_path + 'lda/'
+    lda_model_path = lda_path + 'model/LDA.model'
     lda_coherence_plot_path = lda_path + '../lda_coherence.png'
     best_lda_model, lda_coherence_scores = \
         search_num_of_topics("lda", max_ntops, corpus_tfidf, dictionary, texts, lda_model_path)
     plot_coherence_scores(max_ntops, lda_coherence_scores, lda_coherence_plot_path)
     divide_into_clusters(best_lda_model, df, corpus_tfidf, lda_path)
 
-    lsa_path = '../' + conf['lsa_model_path']
-    lsa_model_path = lsa_path + '/model/LSA.model'
+    lsa_path = topic_modeling_path + 'lsa/'
+    lsa_model_path = lsa_path + 'model/LSA.model'
     lsa_coherence_plot_path = lsa_path + '../lsa_coherence.png'
     best_lsa_model, lsa_coherence_scores = \
         search_num_of_topics("lsa", max_ntops, corpus_tfidf, dictionary, texts, lsa_model_path)
