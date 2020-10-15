@@ -30,7 +30,7 @@ def get_lda_model(corpus, num_topics, dictionary):
     return lda_model
 
 
-def search_num_of_topics(algorithm, max_ntops, corpus, dictionary, texts):
+def search_num_of_topics(algorithm, max_ntops, corpus, dictionary, texts, model_path):
     coherence_scores = []
     if algorithm == "lsa":
         for i in range(max_ntops):
@@ -49,6 +49,7 @@ def search_num_of_topics(algorithm, max_ntops, corpus, dictionary, texts):
         best_num_topics = coherence_scores.index(max(coherence_scores)) + 1
         best_model = get_lda_model(corpus, best_num_topics, dictionary)
     pprint(best_model.print_topics())
+    best_model.save(model_path)
     return best_model, coherence_scores
 
 
@@ -73,22 +74,22 @@ def extract_dominant_topics(best_model, corpus_tfidf):
     return topic_clusters
 
 
-def extract_word2vec_models(df, model_path):
-    distribution_plot_path = model_path + '../topic_distribution.png'
+def extract_word2vec_models(df, topic_model_path):
+    distribution_plot_path = topic_model_path + 'topic_distribution.png'
+    word2vec_models_path = topic_model_path + 'word2vec_models/'
     plot_distribution(df, distribution_plot_path, 'topic')
     count = 0
     for category, df_category in df.groupby('topic'):
         count += 1
-        model_name = model_path + str(count) + ".model"
-        model = word2vec_trainer(df=df_category, size=60, model_path=model_path)
-        model.save(model_name)
+        model_name = word2vec_models_path + str(count) + ".model"
+        word2vec_trainer(df=df_category, size=60, model_path=model_name)
 
 
-def divide_into_clusters(best_model, df, corpus_tfidf, model_path):
+def divide_into_clusters(best_model, df, corpus_tfidf, topic_model_path):
     topic_clusters = extract_dominant_topics(best_model, corpus_tfidf)
     extended_df = pd.DataFrame(list(zip(list(df["description"]), topic_clusters)),
                                columns=['description', 'topic'])
-    extract_word2vec_models(extended_df, model_path)
+    extract_word2vec_models(extended_df, topic_model_path)
 
 
 def main():
@@ -98,19 +99,21 @@ def main():
     texts = list(df["description"])
     dictionary, corpus_tfidf = get_tfidf_corpus(texts)
 
-    lda_model_path = '../' + conf['lda_model_path']
-    lda_coherence_plot_path = lda_model_path + '../lda_coherence.png'
+    lda_path = '../' + conf['lda_model_path']
+    lda_model_path = lda_path + '/model/LDA.model'
+    lda_coherence_plot_path = lda_path + '../lda_coherence.png'
     best_lda_model, lda_coherence_scores = \
-        search_num_of_topics("lda", max_ntops, corpus_tfidf, dictionary, texts)
+        search_num_of_topics("lda", max_ntops, corpus_tfidf, dictionary, texts, lda_model_path)
     plot_coherence_scores(max_ntops, lda_coherence_scores, lda_coherence_plot_path)
-    divide_into_clusters(best_lda_model, df, corpus_tfidf, lda_model_path)
+    divide_into_clusters(best_lda_model, df, corpus_tfidf, lda_path)
 
-    lsa_model_path = '../' + conf['lsa_model_path']
-    lsa_coherence_plot_path = lsa_model_path + '../lsa_coherence.png'
+    lsa_path = '../' + conf['lsa_model_path']
+    lsa_model_path = lsa_path + '/model/LSA.model'
+    lsa_coherence_plot_path = lsa_path + '../lsa_coherence.png'
     best_lsa_model, lsa_coherence_scores = \
-        search_num_of_topics("lsa", max_ntops, corpus_tfidf, dictionary, texts)
+        search_num_of_topics("lsa", max_ntops, corpus_tfidf, dictionary, texts, lsa_model_path)
     plot_coherence_scores(max_ntops, lsa_coherence_scores, lsa_coherence_plot_path)
-    divide_into_clusters(best_lsa_model, df, corpus_tfidf, lsa_model_path)
+    divide_into_clusters(best_lsa_model, df, corpus_tfidf, lsa_path)
 
 
 if __name__ == "__main__":

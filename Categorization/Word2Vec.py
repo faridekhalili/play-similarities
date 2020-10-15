@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 from gensim.models import Word2Vec
 
 
-
 def plot_distribution(df, plot_path, col):
     plt.figure(figsize=(15, 5))
     pd.value_counts(df[col]).plot.bar(title="category distribution in the dataset")
