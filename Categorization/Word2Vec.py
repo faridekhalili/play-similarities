@@ -3,16 +3,13 @@ import time
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from nltk.tokenize import word_tokenize
 from gensim.models import Word2Vec
-from sklearn.model_selection import train_test_split
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import classification_report
 
 
-def plot_distribution(df, plot_path):
+
+def plot_distribution(df, plot_path, col):
     plt.figure(figsize=(15, 5))
-    pd.value_counts(df['label']).plot.bar(title="category distribution in the dataset")
+    pd.value_counts(df[col]).plot.bar(title="category distribution in the dataset")
     plt.xlabel("category")
     plt.ylabel("Number of applications in the dataset")
     plt.savefig(plot_path)
