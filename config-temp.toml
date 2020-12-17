@@ -1,4 +1,7 @@
-database_path = './output/db-temp.db'
-preprocessed_data_path = './output/preprocessed.csv'
+xdatabase_path = './output/db-temp.db'
+database_path = './output/samples.db'
+preprocessed_data_path = './output/preprocessed_samples2.csv'
 model_path = './output/word2vec.model'
+topic_modeling_path = './output/topic_modeling/'
+google_play_model_path = './output/google_play_categories/model/'
 seed_injection_num = 100
